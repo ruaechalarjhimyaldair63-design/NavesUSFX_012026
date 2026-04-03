@@ -9,7 +9,8 @@ enum class EShipState : uint8
 {
     FreeRoaming,
     MovingToFormation,
-    InFormation
+    InFormation,
+    FollowingPath // NUEVO ESTADO
 };
 
 UCLASS()
@@ -19,27 +20,36 @@ class NAVES_USFX_API AShip : public AActor
 
 public:
     AShip();
-    virtual void Tick(float DeltaTime) override;
-
-    // Funciones para que el Manager controle a la nave
-    void CommandFreeRoam();
-    void CommandFormation(FVector TargetPosition, AActor* ReferencePawn);
 
 protected:
     virtual void BeginPlay() override;
 
+public:
+    virtual void Tick(float DeltaTime) override;
+
     UPROPERTY(VisibleAnywhere)
     UStaticMeshComponent* MeshComp;
 
-private:
     EShipState CurrentState;
 
     float FreeRoamSpeed;
     float RoamTurnRate;
+    float TransitionSpeed;
+    float TransitionAlpha;
 
     FVector StartPos;
     FVector TargetPos;
     AActor* PlayerPawn;
-    float TransitionAlpha;
-    float TransitionSpeed;
+
+    void CommandFreeRoam();
+    void CommandFormation(FVector TargetPosition, AActor* ReferencePawn);
+
+    // Nueva función para seguir el camino
+    void CommandFollowPath(TArray<FVector> PathToFollow);
+
+private:
+    // Variables para la lógica de la lista/camino
+    TArray<FVector> PathPoints;
+    int32 CurrentWaypointIndex;
+    float PathMovementSpeed = 500.0f;
 };

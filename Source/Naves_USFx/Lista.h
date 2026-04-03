@@ -1,79 +1,172 @@
 #pragma once
 
-// Estructura del Nodo genérico
+/**
+ * Lista enlazada simple (estructura de datos: nodos, enlaces, inserción, borrado).
+ * Uso típico en este proyecto: Lista<AActor*> para el camino del escenario.
+ */
 template <typename T>
 class NodoLista {
 public:
-    T Dato;
-    NodoLista<T>* Siguiente;
+	T Dato;
+	NodoLista<T>* Siguiente;
 
-    NodoLista(T dato) {
-        Dato = dato;
-        Siguiente = nullptr;
-    }
+	explicit NodoLista(T dato)
+		: Dato(dato)
+		, Siguiente(nullptr)
+	{
+	}
 };
 
-// Contenedor Lista
 template <typename T>
 class Lista {
 private:
-    NodoLista<T>* Cabeza;
-    int Tamano;
+	NodoLista<T>* Cabeza;
+	int Tamano;
+
+	void CopiarDesde(const Lista& Otra)
+	{
+		NodoLista<T>* Actual = Otra.Cabeza;
+		while (Actual != nullptr)
+		{
+			InsertarFinal(Actual->Dato);
+			Actual = Actual->Siguiente;
+		}
+	}
 
 public:
-    Lista() {
-        Cabeza = nullptr;
-        Tamano = 0;
-    }
+	Lista()
+		: Cabeza(nullptr)
+		, Tamano(0)
+	{
+	}
 
-    ~Lista() {
-        Vaciar();
-    }
+	/** Copia profunda de la lista (mismos valores en el mismo orden). */
+	Lista(const Lista& Otra)
+		: Cabeza(nullptr)
+		, Tamano(0)
+	{
+		CopiarDesde(Otra);
+	}
 
-    // Insertar un elemento al final de la lista
-    void InsertarFinal(T elemento) {
-        NodoLista<T>* nuevoNodo = new NodoLista<T>(elemento);
+	Lista& operator=(const Lista& Otra)
+	{
+		if (this != &Otra)
+		{
+			Vaciar();
+			CopiarDesde(Otra);
+		}
+		return *this;
+	}
 
-        // Evaluamos el estado de la lista con if-else
-        if (Cabeza == nullptr) {
-            // CONDICIÓN IF: La lista está vacía, el nuevo nodo es el inicio
-            Cabeza = nuevoNodo;
-        } else {
-            // CONDICIÓN ELSE: La lista ya tiene elementos, recorremos hasta el final
-            NodoLista<T>* actual = Cabeza;
-            while (actual->Siguiente != nullptr) {
-                actual = actual->Siguiente;
-            }
-            actual->Siguiente = nuevoNodo;
-        }
-        Tamano++;
-    }
+	~Lista()
+	{
+		Vaciar();
+	}
 
-    // Obtener un elemento por su índice
-    T Obtener(int indice) {
-        if (indice < 0 || indice >= Tamano) {
-            return nullptr;
-        } else {
-            NodoLista<T>* actual = Cabeza;
-            for (int i = 0; i < indice; i++) {
-                actual = actual->Siguiente;
-            }
-            return actual->Dato;
-        }
-    }
+	void InsertarInicio(T Elemento)
+	{
+		NodoLista<T>* NuevoNodo = new NodoLista<T>(Elemento);
+		NuevoNodo->Siguiente = Cabeza;
+		Cabeza = NuevoNodo;
+		Tamano++;
+	}
 
-    int ObtenerTamano() const {
-        return Tamano;
-    }
+	void InsertarFinal(T Elemento)
+	{
+		NodoLista<T>* NuevoNodo = new NodoLista<T>(Elemento);
 
-    void Vaciar() {
-        NodoLista<T>* actual = Cabeza;
-        while (actual != nullptr) {
-            NodoLista<T>* siguiente = actual->Siguiente;
-            delete actual;
-            actual = siguiente;
-        }
-        Cabeza = nullptr;
-        Tamano = 0;
-    }
+		if (Cabeza == nullptr)
+		{
+			Cabeza = NuevoNodo;
+		}
+		else
+		{
+			NodoLista<T>* Actual = Cabeza;
+			while (Actual->Siguiente != nullptr)
+			{
+				Actual = Actual->Siguiente;
+			}
+			Actual->Siguiente = NuevoNodo;
+		}
+		Tamano++;
+	}
+
+	/** Índice válido [0, Tamano). Si no es válido, devuelve valor por defecto de T. */
+	T Obtener(int Indice) const
+	{
+		if (Indice < 0 || Indice >= Tamano)
+		{
+			return T();
+		}
+		NodoLista<T>* Actual = Cabeza;
+		for (int i = 0; i < Indice; i++)
+		{
+			Actual = Actual->Siguiente;
+		}
+		return Actual->Dato;
+	}
+
+	bool IntentarObtener(int Indice, T& Salida) const
+	{
+		if (Indice < 0 || Indice >= Tamano)
+		{
+			return false;
+		}
+		NodoLista<T>* Actual = Cabeza;
+		for (int i = 0; i < Indice; i++)
+		{
+			Actual = Actual->Siguiente;
+		}
+		Salida = Actual->Dato;
+		return true;
+	}
+
+	int ObtenerTamano() const { return Tamano; }
+
+	bool EsVacia() const { return Cabeza == nullptr; }
+
+	/**
+	 * Elimina el nodo en Indice. Los actores UObjects no se destruyen aquí;
+	 * solo se quita el puntero de la lista.
+	 */
+	bool EliminarEn(int Indice)
+	{
+		if (Indice < 0 || Indice >= Tamano)
+		{
+			return false;
+		}
+
+		if (Indice == 0)
+		{
+			NodoLista<T>* Viejo = Cabeza;
+			Cabeza = Cabeza->Siguiente;
+			delete Viejo;
+			Tamano--;
+			return true;
+		}
+
+		NodoLista<T>* Anterior = Cabeza;
+		for (int i = 0; i < Indice - 1; i++)
+		{
+			Anterior = Anterior->Siguiente;
+		}
+		NodoLista<T>* Viejo = Anterior->Siguiente;
+		Anterior->Siguiente = Viejo->Siguiente;
+		delete Viejo;
+		Tamano--;
+		return true;
+	}
+
+	void Vaciar()
+	{
+		NodoLista<T>* Actual = Cabeza;
+		while (Actual != nullptr)
+		{
+			NodoLista<T>* Siguiente = Actual->Siguiente;
+			delete Actual;
+			Actual = Siguiente;
+		}
+		Cabeza = nullptr;
+		Tamano = 0;
+	}
 };

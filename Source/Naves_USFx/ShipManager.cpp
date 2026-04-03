@@ -1,5 +1,6 @@
 #include "ShipManager.h"
 #include "Ship.h"
+#include "GeneradorDeCamino.h" // Importante para leer la Lista
 #include "Kismet/GameplayStatics.h"
 
 AShipManager::AShipManager()
@@ -18,6 +19,7 @@ void AShipManager::BeginPlay()
     if (ShipClassToSpawn)
     {
         SpawnFleet();
+        // Cambia de estado cada 5 segundos
         GetWorld()->GetTimerManager().SetTimer(StateTimerHandle, this, &AShipManager::ToggleState, 5.0f, true);
     }
 }
@@ -47,35 +49,40 @@ void AShipManager::SpawnFleet()
 
 void AShipManager::ToggleState()
 {
-    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-    if (!PlayerPawn) return;
-
     bIsInFormation = !bIsInFormation;
 
     if (bIsInFormation)
     {
-        FVector PawnLoc = PlayerPawn->GetActorLocation();
-        FVector PawnForward = PlayerPawn->GetActorForwardVector();
-        FVector PawnRight = PlayerPawn->GetActorRightVector();
+        // 1. Buscar el GeneradorDeCamino en el escenario
+        AActor* ActorGenerador = UGameplayStatics::GetActorOfClass(GetWorld(), AGeneradorDeCamino::StaticClass());
+        AGeneradorDeCamino* Generador = Cast<AGeneradorDeCamino>(ActorGenerador);
 
-        FVector FormationCenter = PawnLoc + (PawnForward * 1000.0f);
-
-        int32 Columns = 5;
-        float Spacing = 200.0f;
-
-        for (int32 i = 0; i < Fleet.Num(); i++)
+        if (Generador)
         {
-            int32 Row = i / Columns;
-            int32 Col = i % Columns;
+            // 2. Obtener los puntos generados por tu Lista<AActor*>
+            TArray<FVector> PuntosDelCamino = Generador->ObtenerPuntosDeCamino();
 
-            FVector GridOffset = (PawnRight * (Col - Columns / 2) * Spacing) + (PawnForward * Row * Spacing);
-            FVector TargetPos = FormationCenter + GridOffset;
-
-            Fleet[i]->CommandFormation(TargetPos, PlayerPawn);
+            if (PuntosDelCamino.Num() > 0)
+            {
+                // 3. Ordenar a la flota que siga la ruta
+                for (int32 i = 0; i < Fleet.Num(); i++)
+                {
+                    Fleet[i]->CommandFollowPath(PuntosDelCamino);
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("GeneradorDeCamino encontrado, pero la lista esta vacia."));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("No se encontro ningun GeneradorDeCamino en el mapa."));
         }
     }
     else
     {
+        // Vuelven a moverse libremente
         for (AShip* Ship : Fleet)
         {
             Ship->CommandFreeRoam();

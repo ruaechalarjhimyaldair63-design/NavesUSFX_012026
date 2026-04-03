@@ -13,17 +13,23 @@ class NAVES_USFX_API AShipManager : public AActor
 
 public:
     AShipManager();
-    virtual void Tick(float DeltaTime) override;
 
 protected:
     virtual void BeginPlay() override;
 
-private:
-    UClass* ShipClassToSpawn;
+public:
+    virtual void Tick(float DeltaTime) override;
+
+    UPROPERTY(EditAnywhere)
     int32 NumberOfShips;
-    TArray<AShip*> Fleet;
-    FTimerHandle StateTimerHandle;
+
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<AShip> ShipClassToSpawn;
+
     bool bIsInFormation;
+    FTimerHandle StateTimerHandle;
+
+    TArray<AShip*> Fleet;
 
     void SpawnFleet();
     void ToggleState();

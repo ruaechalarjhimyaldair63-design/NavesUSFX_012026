@@ -75,6 +75,32 @@ void AShip::Tick(float DeltaTime)
     {
         SetActorLocation(TargetPos);
     }
+    else if (CurrentState == EShipState::FollowingPath && PathPoints.Num() > 0)
+    {
+        // 1. Obtener la posición del bloque actual
+        FVector TargetPoint = PathPoints[CurrentWaypointIndex];
+
+        // 2. Calcular la dirección y moverse
+        FVector MoveDir = (TargetPoint - GetActorLocation()).GetSafeNormal();
+        AddActorLocalOffset(MoveDir * PathMovementSpeed * DeltaTime);
+
+        // 3. Rotar la nave para que mire hacia donde se mueve
+        FRotator TargetRot = MoveDir.Rotation();
+        SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRot, DeltaTime, 5.0f));
+
+        // 4. Comprobar si ya llegamos al bloque (margen de 50 unidades)
+        float DistanceToTarget = FVector::Distance(GetActorLocation(), TargetPoint);
+        if (DistanceToTarget < 50.0f)
+        {
+            CurrentWaypointIndex++; // Pasar al siguiente bloque
+
+            // Si llegamos al final de la lista, volver al inicio (bucle infinito en el camino)
+            if (CurrentWaypointIndex >= PathPoints.Num())
+            {
+                CurrentWaypointIndex = 0;
+            }
+        }
+    }
 }
 
 void AShip::CommandFreeRoam()
@@ -89,4 +115,14 @@ void AShip::CommandFormation(FVector TargetPosition, AActor* ReferencePawn)
     TargetPos = TargetPosition;
     PlayerPawn = ReferencePawn;
     TransitionAlpha = 0.0f;
+}
+
+void AShip::CommandFollowPath(TArray<FVector> PathToFollow)
+{
+    if (PathToFollow.Num() > 0)
+    {
+        PathPoints = PathToFollow;
+        CurrentWaypointIndex = 0; // Empezar en el primer bloque
+        CurrentState = EShipState::FollowingPath;
+    }
 }
