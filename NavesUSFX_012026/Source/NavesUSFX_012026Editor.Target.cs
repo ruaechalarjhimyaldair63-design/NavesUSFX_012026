@@ -3,12 +3,12 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class NavesUSFX_0012026EditorTarget : TargetRules
+public class NavesUSFX_012026EditorTarget : TargetRules
 {
-	public NavesUSFX_0012026EditorTarget(TargetInfo Target) : base(Target)
+	public NavesUSFX_012026EditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.Add("NavesUSFX_0012026");
+		ExtraModuleNames.Add("NavesUSFX_012026");
 	}
 }

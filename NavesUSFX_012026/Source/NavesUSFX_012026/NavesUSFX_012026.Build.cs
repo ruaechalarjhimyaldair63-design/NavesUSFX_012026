@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class NavesUSFX_0012026 : ModuleRules
+public class NavesUSFX_012026 : ModuleRules
 {
-	public NavesUSFX_0012026(ReadOnlyTargetRules Target) : base(Target)
+	public NavesUSFX_012026(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 

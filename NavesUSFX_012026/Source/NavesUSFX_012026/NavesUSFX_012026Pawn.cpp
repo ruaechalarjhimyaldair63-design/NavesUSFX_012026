@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "NavesUSFX_0012026Pawn.h"
+#include "NavesUSFX_012026Pawn.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -9,7 +9,7 @@
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 
-ANavesUSFX_0012026Pawn::ANavesUSFX_0012026Pawn()
+ANavesUSFX_012026Pawn::ANavesUSFX_012026Pawn()
 {
 	// Structure to hold one-time initialization
 	struct FConstructorStatics
@@ -48,7 +48,7 @@ ANavesUSFX_0012026Pawn::ANavesUSFX_0012026Pawn()
 	CurrentForwardSpeed = 500.f;
 }
 
-void ANavesUSFX_0012026Pawn::Tick(float DeltaSeconds)
+void ANavesUSFX_012026Pawn::Tick(float DeltaSeconds)
 {
 	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
 
@@ -68,7 +68,7 @@ void ANavesUSFX_0012026Pawn::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-void ANavesUSFX_0012026Pawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+void ANavesUSFX_012026Pawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
@@ -78,18 +78,18 @@ void ANavesUSFX_0012026Pawn::NotifyHit(class UPrimitiveComponent* MyComp, class 
 }
 
 
-void ANavesUSFX_0012026Pawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void ANavesUSFX_012026Pawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
     // Check if PlayerInputComponent is valid (not NULL)
 	check(PlayerInputComponent);
 
 	// Bind our control axis' to callback functions
-	PlayerInputComponent->BindAxis("Thrust", this, &ANavesUSFX_0012026Pawn::ThrustInput);
-	PlayerInputComponent->BindAxis("MoveUp", this, &ANavesUSFX_0012026Pawn::MoveUpInput);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ANavesUSFX_0012026Pawn::MoveRightInput);
+	PlayerInputComponent->BindAxis("Thrust", this, &ANavesUSFX_012026Pawn::ThrustInput);
+	PlayerInputComponent->BindAxis("MoveUp", this, &ANavesUSFX_012026Pawn::MoveUpInput);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ANavesUSFX_012026Pawn::MoveRightInput);
 }
 
-void ANavesUSFX_0012026Pawn::ThrustInput(float Val)
+void ANavesUSFX_012026Pawn::ThrustInput(float Val)
 {
 	// Is there any input?
 	bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
@@ -101,7 +101,7 @@ void ANavesUSFX_0012026Pawn::ThrustInput(float Val)
 	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
 }
 
-void ANavesUSFX_0012026Pawn::MoveUpInput(float Val)
+void ANavesUSFX_012026Pawn::MoveUpInput(float Val)
 {
 	// Target pitch speed is based in input
 	float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
@@ -113,7 +113,7 @@ void ANavesUSFX_0012026Pawn::MoveUpInput(float Val)
 	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
-void ANavesUSFX_0012026Pawn::MoveRightInput(float Val)
+void ANavesUSFX_012026Pawn::MoveRightInput(float Val)
 {
 	// Target yaw speed is based on input
 	float TargetYawSpeed = (Val * TurnSpeed);
